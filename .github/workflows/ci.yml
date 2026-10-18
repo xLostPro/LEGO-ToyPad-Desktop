@@ -80,7 +80,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: LegoToyPad-${{ matrix.rid }}.*
-          generate_release_notes: true
+          # Four jobs attach to the same release; only one should add the generated notes.
+          generate_release_notes: ${{ matrix.rid == 'win-x64' }}
 
       - name: Upload build (manual runs only)
         if: github.event_name == 'workflow_dispatch'
