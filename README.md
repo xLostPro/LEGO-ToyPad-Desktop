@@ -46,7 +46,7 @@ ToyPad, so write and reset always use the center tag.
 ## Install
 
 Download the build for your system from
-[Releases](../../releases) (or the latest CI run's artifacts). Each one is a single
+[Releases](../../releases) (or the artifacts of a manually started CI run). Each one is a single
 self-contained file, so you don't need to install .NET.
 
 | OS | Download | Notes |
