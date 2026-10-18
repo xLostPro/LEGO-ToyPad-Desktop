@@ -1,0 +1,175 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:LegoToyPad.App.ViewModels"
+             xmlns:core="using:LegoToyPad.Core"
+             x:Class="LegoToyPad.App.Views.PortalView"
+             x:DataType="vm:PortalViewModel">
+
+    <UserControl.DataTemplates>
+        <DataTemplate DataType="vm:PadViewModel">
+            <Border Classes="card" Padding="16" MinHeight="170"
+                    Classes.writable="{Binding IsWritable}"
+                    AutomationProperties.Name="{Binding AccessibleSummary}">
+                <StackPanel Spacing="12">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Text="{Binding Title}" Classes="h3" VerticalAlignment="Center" />
+                        <Border Grid.Column="1" Classes="subtle" Padding="8,3" CornerRadius="12">
+                            <TextBlock Text="{Binding Capability}" FontSize="12" />
+                        </Border>
+                    </Grid>
+
+                    <Border IsVisible="{Binding IsEmpty}" BorderBrush="{DynamicResource CardBorderBrush}"
+                            BorderThickness="1" CornerRadius="8" Padding="12,18">
+                        <TextBlock Text="No tag" Classes="secondary" HorizontalAlignment="Center" />
+                    </Border>
+
+                    <ItemsControl ItemsSource="{Binding Tags}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Spacing="8" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:TagViewModel">
+                                <Button Classes="tag"
+                                        Command="{Binding $parent[UserControl].((vm:PortalViewModel)DataContext).ReadTagCommand}"
+                                        CommandParameter="{Binding}"
+                                        AutomationProperties.Name="{Binding AccessibleName}"
+                                        ToolTip.Tip="Read this tag">
+                                    <Grid ColumnDefinitions="Auto,*">
+                                        <PathIcon Data="{StaticResource IconTag}" Width="18" Height="18" Margin="0,2,12,0" VerticalAlignment="Top" />
+                                        <StackPanel Grid.Column="1" Spacing="2">
+                                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                            <TextBlock Text="{Binding Detail}" Classes="caption" TextWrapping="Wrap" />
+                                            <TextBlock Text="{Binding Uid}" Classes="caption mono" FontSize="12" TextWrapping="Wrap" />
+                                        </StackPanel>
+                                    </Grid>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+    </UserControl.DataTemplates>
+
+    <ScrollViewer>
+        <StackPanel Margin="32,28" Spacing="24" MaxWidth="1100">
+
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Spacing="4">
+                    <TextBlock Classes="h1" Text="Portal" />
+                    <TextBlock Classes="secondary" Text="{Binding TagSummary}" AutomationProperties.LiveSetting="Polite" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                    <Button Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).RescanCommand}"
+                            ToolTip.Tip="Rescan every slot on the portal (F5)">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <PathIcon Data="{StaticResource IconRefresh}" Width="16" Height="16" />
+                            <TextBlock Text="Rescan" />
+                        </StackPanel>
+                    </Button>
+                    <Button Classes="accent" Command="{Binding ReadAllCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <PathIcon Data="{StaticResource IconSearch}" Width="16" Height="16" />
+                            <TextBlock Text="Read all tags" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+
+            <!-- Laid out like the physical portal: left, center (raised), right -->
+            <Grid ColumnDefinitions="*,16,1.15*,16,*">
+                <ContentControl Grid.Column="0" Content="{Binding Left}" Margin="0,16,0,0" />
+                <ContentControl Grid.Column="2" Content="{Binding Center}" />
+                <ContentControl Grid.Column="4" Content="{Binding Right}" Margin="0,16,0,0" />
+            </Grid>
+
+            <TextBlock Classes="caption" TextWrapping="Wrap"
+                       Text="Select a tag to read it. Only the center pad has a write antenna, so writing and resetting always use the tag on the center pad." />
+
+            <!-- Read results -->
+            <StackPanel Spacing="12" IsVisible="{Binding HasResults}">
+                <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Classes="h2" Text="Read results" VerticalAlignment="Center" />
+                    <Button Grid.Column="1" Content="Clear" Command="{Binding ClearResultsCommand}" />
+                </Grid>
+
+                <ItemsControl ItemsSource="{Binding Results}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Spacing="12" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:ReadResultViewModel">
+                            <Border Classes="card">
+                                <StackPanel Spacing="14">
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <StackPanel Spacing="2">
+                                            <TextBlock Text="{Binding Location}" Classes="caption" />
+                                            <TextBlock Text="{Binding Heading}" Classes="h2" TextWrapping="Wrap" />
+                                            <TextBlock Text="{Binding Subheading}" Classes="secondary" TextWrapping="Wrap" />
+                                        </StackPanel>
+                                        <WrapPanel Grid.Column="1" VerticalAlignment="Top" ItemSpacing="8" LineSpacing="8" MaxWidth="360"
+                                                   HorizontalAlignment="Right">
+                                            <Button Command="{Binding SaveToLibraryCommand}" IsVisible="{Binding IsIdentified}"
+                                                    IsEnabled="{Binding !IsSaved}">
+                                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                                    <PathIcon Data="{StaticResource IconSave}" Width="14" Height="14" />
+                                                    <TextBlock Text="{Binding SaveText}" />
+                                                </StackPanel>
+                                            </Button>
+                                            <Button Content="Write a copy…" Command="{Binding WriteCopyCommand}" IsVisible="{Binding IsIdentified}" />
+                                            <Button Content="Raw pages" Command="{Binding DumpPagesCommand}"
+                                                    ToolTip.Tip="Dump every page (0x00–0x2C) for troubleshooting" />
+                                        </WrapPanel>
+                                    </Grid>
+
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Panel Width="16" Height="16">
+                                            <PathIcon Classes="success" Data="{StaticResource IconSuccess}" IsVisible="{Binding PasswordMatches}" Width="16" Height="16" />
+                                            <PathIcon Classes="warning" Data="{StaticResource IconWarning}" IsVisible="{Binding !PasswordMatches}" Width="16" Height="16" />
+                                        </Panel>
+                                        <TextBlock Text="{Binding PasswordText}" TextWrapping="Wrap" />
+                                    </StackPanel>
+
+                                    <ItemsControl ItemsSource="{Binding Pages}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <WrapPanel ItemSpacing="8" LineSpacing="8" />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="core:PageValue">
+                                                <Border Classes="subtle" AutomationProperties.Name="{Binding AccessibleName}">
+                                                    <StackPanel Spacing="2">
+                                                        <TextBlock Text="{Binding Page, StringFormat='Page {0}'}" Classes="caption" FontSize="12" />
+                                                        <SelectableTextBlock Text="{Binding Hex}" Classes="mono" FontSize="15" />
+                                                    </StackPanel>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+
+                                    <TextBlock Classes="caption mono" Text="{Binding Uid, StringFormat='UID {0}'}" />
+
+                                    <Expander Header="Raw page dump" IsExpanded="True" HorizontalAlignment="Stretch"
+                                              IsVisible="{Binding Dump, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <SelectableTextBlock Text="{Binding Dump}" Classes="mono" FontSize="13" LineHeight="20" />
+                                            <Button Grid.Column="1" VerticalAlignment="Top" Command="{Binding CopyDumpCommand}"
+                                                    ToolTip.Tip="Copy dump" AutomationProperties.Name="Copy dump to clipboard">
+                                                <PathIcon Data="{StaticResource IconCopy}" Width="14" Height="14" />
+                                            </Button>
+                                        </Grid>
+                                    </Expander>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

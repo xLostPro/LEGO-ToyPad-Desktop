@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/LegoToyPad.App/LegoToyPad.App.csproj" />
+    <Project Path="src/LegoToyPad.Core/LegoToyPad.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/LegoToyPad.App.Tests/LegoToyPad.App.Tests.csproj" />
+    <Project Path="tests/LegoToyPad.Core.Tests/LegoToyPad.Core.Tests.csproj" />
+  </Folder>
+</Solution>

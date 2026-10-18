@@ -1,0 +1,44 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- Every text colour here meets WCAG AA (4.5:1) against its card/background. -->
+    <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Light">
+            <SolidColorBrush x:Key="AppBackgroundBrush" Color="#F4F5F7" />
+            <SolidColorBrush x:Key="NavBackgroundBrush" Color="#EBEDF0" />
+            <SolidColorBrush x:Key="CardBrush" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="CardBorderBrush" Color="#D9DDE3" />
+            <SolidColorBrush x:Key="SubtleBrush" Color="#F0F2F5" />
+            <SolidColorBrush x:Key="SecondaryTextBrush" Color="#4A5361" />
+            <SolidColorBrush x:Key="SuccessBrush" Color="#0E7A0D" />
+            <SolidColorBrush x:Key="SuccessBackgroundBrush" Color="#E5F4E3" />
+            <SolidColorBrush x:Key="WarningBrush" Color="#8A5300" />
+            <SolidColorBrush x:Key="WarningBackgroundBrush" Color="#FFF4CE" />
+            <SolidColorBrush x:Key="ErrorBrush" Color="#B3261E" />
+            <SolidColorBrush x:Key="ErrorBackgroundBrush" Color="#FDE7E9" />
+            <SolidColorBrush x:Key="InfoBrush" Color="#005FB8" />
+            <SolidColorBrush x:Key="InfoBackgroundBrush" Color="#E6F0FA" />
+            <SolidColorBrush x:Key="BrandBrush" Color="#D01012" />
+            <SolidColorBrush x:Key="BrandStudBrush" Color="#FFCF00" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Dark">
+            <SolidColorBrush x:Key="AppBackgroundBrush" Color="#1A1C20" />
+            <SolidColorBrush x:Key="NavBackgroundBrush" Color="#202227" />
+            <SolidColorBrush x:Key="CardBrush" Color="#262930" />
+            <SolidColorBrush x:Key="CardBorderBrush" Color="#3A3F48" />
+            <SolidColorBrush x:Key="SubtleBrush" Color="#2E323A" />
+            <SolidColorBrush x:Key="SecondaryTextBrush" Color="#B8BEC8" />
+            <SolidColorBrush x:Key="SuccessBrush" Color="#7DD87A" />
+            <SolidColorBrush x:Key="SuccessBackgroundBrush" Color="#1F3320" />
+            <SolidColorBrush x:Key="WarningBrush" Color="#F5C451" />
+            <SolidColorBrush x:Key="WarningBackgroundBrush" Color="#3A3017" />
+            <SolidColorBrush x:Key="ErrorBrush" Color="#FF9C9C" />
+            <SolidColorBrush x:Key="ErrorBackgroundBrush" Color="#3D2224" />
+            <SolidColorBrush x:Key="InfoBrush" Color="#78C4FF" />
+            <SolidColorBrush x:Key="InfoBackgroundBrush" Color="#1B2D3F" />
+            <SolidColorBrush x:Key="BrandBrush" Color="#E5383B" />
+            <SolidColorBrush x:Key="BrandStudBrush" Color="#FFD43B" />
+        </ResourceDictionary>
+    </ResourceDictionary.ThemeDictionaries>
+
+    <FontFamily x:Key="MonoFont">Cascadia Mono, Consolas, Menlo, DejaVu Sans Mono, Liberation Mono, monospace</FontFamily>
+</ResourceDictionary>

@@ -1,0 +1,66 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:LegoToyPad.App.ViewModels"
+             xmlns:core="using:LegoToyPad.Core"
+             x:Class="LegoToyPad.App.Views.ResetView"
+             x:DataType="vm:ResetViewModel">
+    <ScrollViewer>
+        <StackPanel Margin="32,28" Spacing="20" MaxWidth="900" HorizontalAlignment="Left">
+            <StackPanel Spacing="4">
+                <TextBlock Classes="h1" Text="Reset a tag" />
+                <TextBlock Classes="secondary" TextWrapping="Wrap"
+                           Text="Erase the character/vehicle data from a custom tag on the center pad so it can be written again." />
+            </StackPanel>
+
+            <Border Classes="card">
+                <StackPanel Spacing="12">
+                    <TextBlock Classes="step" Text="STEP 1" />
+                    <TextBlock Classes="h2" Text="Preview the tag" />
+                    <TextBlock Classes="secondary" TextWrapping="Wrap" Text="Reads the pages that will be erased. Nothing is changed yet." />
+                    <Button Content="Preview reset" Command="{Binding PreviewCommand}" HorizontalAlignment="Left" />
+
+                    <ItemsControl ItemsSource="{Binding Preview.Current, FallbackValue={x:Null}}" IsVisible="{Binding HasPreview}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel ItemSpacing="8" LineSpacing="8" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="core:PageValue">
+                                <Border Classes="subtle" AutomationProperties.Name="{Binding AccessibleName}">
+                                    <StackPanel Spacing="2">
+                                        <TextBlock Text="{Binding Page, StringFormat='Page {0}'}" Classes="caption" FontSize="12" />
+                                        <TextBlock Text="{Binding Hex}" Classes="mono" FontSize="15" />
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <TextBlock Classes="caption mono" IsVisible="{Binding HasPreview}"
+                               Text="{Binding Preview.Tag.Uid, StringFormat='UID {0}', FallbackValue=''}" />
+                </StackPanel>
+            </Border>
+
+            <Border Classes="card">
+                <StackPanel Spacing="12">
+                    <TextBlock Classes="step" Text="STEP 2" />
+                    <TextBlock Classes="h2" Text="Reset" />
+                    <CheckBox IsChecked="{Binding ClearPasswordPage}">
+                        <StackPanel Spacing="2">
+                            <TextBlock Text="Also clear the password page (0x2B)" />
+                            <TextBlock Classes="caption" TextWrapping="Wrap"
+                                       Text="Only needed if the tag was given a password. Locked factory tags can't be cleared." />
+                        </StackPanel>
+                    </CheckBox>
+                    <Button Classes="danger" Command="{Binding ResetCommand}" HorizontalAlignment="Left" Padding="20,9">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <PathIcon Data="{StaticResource IconReset}" Width="16" Height="16" />
+                            <TextBlock Text="Reset tag…" />
+                        </StackPanel>
+                    </Button>
+                    <ContentControl Content="{Binding Status}" />
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

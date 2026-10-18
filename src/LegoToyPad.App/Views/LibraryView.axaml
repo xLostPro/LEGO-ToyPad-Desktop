@@ -1,0 +1,60 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:LegoToyPad.App.ViewModels"
+             x:Class="LegoToyPad.App.Views.LibraryView"
+             x:DataType="vm:LibraryViewModel">
+    <ScrollViewer>
+        <StackPanel Margin="32,28" Spacing="20" MaxWidth="900" HorizontalAlignment="Left">
+            <StackPanel Spacing="4">
+                <TextBlock Classes="h1" Text="Library" />
+                <TextBlock Classes="secondary" TextWrapping="Wrap"
+                           Text="Characters and vehicles you've saved from a read, ready to write onto more blank tags." />
+            </StackPanel>
+
+            <Border Classes="card" IsVisible="{Binding IsEmpty}">
+                <StackPanel Spacing="8">
+                    <PathIcon Data="{StaticResource IconLibrary}" Width="32" Height="32" HorizontalAlignment="Left"
+                              Foreground="{DynamicResource SecondaryTextBrush}" />
+                    <TextBlock Classes="h3" Text="Nothing saved yet" />
+                    <TextBlock Classes="secondary" TextWrapping="Wrap"
+                               Text="Read a tag on the Portal page, then choose “Save to library” on the result." />
+                </StackPanel>
+            </Border>
+
+            <ItemsControl ItemsSource="{Binding Entries}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Spacing="8" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:LibraryEntryViewModel">
+                        <Border Classes="card" Padding="16,12" AutomationProperties.Name="{Binding AccessibleName}">
+                            <Grid ColumnDefinitions="Auto,*,Auto">
+                                <PathIcon Data="{StaticResource IconTag}" Width="20" Height="20" Margin="0,0,14,0" />
+                                <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
+                                    <TextBlock Text="{Binding Detail}" Classes="caption" />
+                                    <TextBlock Text="{Binding Saved}" Classes="caption" FontSize="12" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                    <Button Content="Write…"
+                                            Command="{Binding $parent[UserControl].((vm:LibraryViewModel)DataContext).UseForWriteCommand}"
+                                            CommandParameter="{Binding}"
+                                            AutomationProperties.Name="{Binding Name, StringFormat='Write {0} to a tag'}" />
+                                    <Button Classes="icon"
+                                            Command="{Binding $parent[UserControl].((vm:LibraryViewModel)DataContext).RemoveCommand}"
+                                            CommandParameter="{Binding}"
+                                            ToolTip.Tip="Remove from library"
+                                            AutomationProperties.Name="{Binding Name, StringFormat='Remove {0} from library'}">
+                                        <PathIcon Data="{StaticResource IconDelete}" Width="16" Height="16" />
+                                    </Button>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

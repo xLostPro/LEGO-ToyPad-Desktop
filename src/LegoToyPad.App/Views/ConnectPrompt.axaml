@@ -1,0 +1,31 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:LegoToyPad.App.ViewModels"
+             x:Class="LegoToyPad.App.Views.ConnectPrompt"
+             x:DataType="vm:MainViewModel">
+    <ScrollViewer>
+        <StackPanel MaxWidth="520" Margin="32" Spacing="20" VerticalAlignment="Center">
+            <PathIcon Data="{StaticResource IconUsb}" Width="56" Height="56" HorizontalAlignment="Left"
+                      Foreground="{DynamicResource SecondaryTextBrush}" />
+            <StackPanel Spacing="8">
+                <TextBlock Classes="h1" Text="Connect your ToyPad" />
+                <TextBlock Classes="secondary" TextWrapping="Wrap" LineHeight="22"
+                           Text="Plug the LEGO Dimensions ToyPad (PS3, PS4 or Wii U version) into a USB port, then connect. The Xbox ToyPad uses a different protocol and isn't supported." />
+            </StackPanel>
+
+            <ContentControl Content="{Binding ConnectionError}" />
+
+            <Button Classes="accent" Content="Connect to ToyPad" FontSize="15" Padding="20,10"
+                    Command="{Binding ConnectCommand}" HorizontalAlignment="Left" />
+
+            <Expander Header="Having trouble connecting?" HorizontalAlignment="Stretch">
+                <StackPanel Spacing="8">
+                    <TextBlock TextWrapping="Wrap" Text="• Close the game and any other app that might be using the ToyPad." />
+                    <TextBlock TextWrapping="Wrap" Text="• Unplug the ToyPad, wait a few seconds, and plug it back in." />
+                    <TextBlock TextWrapping="Wrap" Text="• Linux: install the udev rule from the README so your user can open the device without sudo." />
+                    <TextBlock TextWrapping="Wrap" Text="• macOS: if prompted, allow the app under System Settings › Privacy &amp; Security › Input Monitoring." />
+                </StackPanel>
+            </Expander>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

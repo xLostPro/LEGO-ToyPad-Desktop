@@ -1,0 +1,110 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:LegoToyPad.App.ViewModels"
+             x:Class="LegoToyPad.App.Views.WriteView"
+             x:DataType="vm:WriteViewModel">
+    <Grid RowDefinitions="Auto,*" ColumnDefinitions="1.25*,20,*" Margin="32,28">
+        <StackPanel Grid.ColumnSpan="3" Spacing="4" Margin="0,0,0,20">
+            <TextBlock Classes="h1" Text="Write a tag" />
+            <TextBlock Classes="secondary" TextWrapping="Wrap"
+                       Text="Turn a blank NTAG213 sticker or card into a LEGO Dimensions character or vehicle." />
+        </StackPanel>
+
+        <!-- Step 1: pick what to write -->
+        <Border Grid.Row="1" Grid.Column="0" Classes="card" MinWidth="300">
+            <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,*,Auto" RowSpacing="12">
+                <TextBlock Classes="step" Text="STEP 1" />
+                <TextBlock Grid.Row="1" Classes="h2" Text="Choose a character or vehicle" />
+
+                <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="16">
+                    <RadioButton GroupName="TokenKind" Content="_Characters" IsChecked="{Binding IsCharacterMode}" />
+                    <RadioButton GroupName="TokenKind" Content="_Vehicles &amp; gadgets" IsChecked="{Binding IsVehicleMode}" />
+                </StackPanel>
+
+                <TextBox Grid.Row="3" Text="{Binding SearchText}" PlaceholderText="Search by name, world or ID"
+                         AutomationProperties.Name="Search characters and vehicles">
+                    <TextBox.InnerLeftContent>
+                        <PathIcon Data="{StaticResource IconSearch}" Width="16" Height="16" Margin="10,0,0,0"
+                                  Foreground="{DynamicResource SecondaryTextBrush}" />
+                    </TextBox.InnerLeftContent>
+                </TextBox>
+
+                <TextBlock Grid.Row="4" Classes="caption" Text="{Binding ResultCountText}" AutomationProperties.LiveSetting="Polite" />
+
+                <ListBox Grid.Row="5" ItemsSource="{Binding Options}" SelectedItem="{Binding Selected}" MinHeight="160"
+                         BorderBrush="{DynamicResource CardBorderBrush}" BorderThickness="1" CornerRadius="8"
+                         AutomationProperties.Name="Characters and vehicles">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="vm:TokenOption">
+                            <Grid ColumnDefinitions="*,Auto" AutomationProperties.Name="{Binding AccessibleName}">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                    <TextBlock Text="{Binding Detail}" Classes="caption" />
+                                </StackPanel>
+                                <TextBlock Grid.Column="1" Text="{Binding IdText}" Classes="caption mono" VerticalAlignment="Center" />
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+                <StackPanel Grid.Row="6" Spacing="8"
+                            IsVisible="{Binding !$parent[Window].((vm:MainViewModel)DataContext).LibraryPage.IsEmpty}">
+                    <TextBlock Classes="h3" Text="From your library" />
+                    <ScrollViewer MaxHeight="96">
+                        <ItemsControl ItemsSource="{Binding $parent[Window].((vm:MainViewModel)DataContext).LibraryPage.Entries}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel ItemSpacing="8" LineSpacing="8" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:LibraryEntryViewModel">
+                                    <Button Content="{Binding Name}" CornerRadius="16" Padding="14,5"
+                                            Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).LibraryPage.UseForWriteCommand}"
+                                            CommandParameter="{Binding}"
+                                            AutomationProperties.Name="{Binding AccessibleName}"
+                                            ToolTip.Tip="{Binding Detail}" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Steps 2 and 3 -->
+        <ScrollViewer Grid.Row="1" Grid.Column="2">
+            <StackPanel Spacing="20" MinWidth="260">
+                <Border Classes="card">
+                    <StackPanel Spacing="12">
+                        <TextBlock Classes="step" Text="STEP 2" />
+                        <TextBlock Classes="h2" Text="Check the tag on the center pad" TextWrapping="Wrap" />
+                        <TextBlock Classes="secondary" TextWrapping="Wrap"
+                                   Text="Place a blank tag on the center pad. The check makes sure it has no password and accepts writes; nothing on the tag is changed." />
+                        <Button Content="Check tag" Command="{Binding CheckTagCommand}" HorizontalAlignment="Left" />
+                        <ContentControl Content="{Binding CheckStatus}" />
+                    </StackPanel>
+                </Border>
+
+                <Border Classes="card">
+                    <StackPanel Spacing="12">
+                        <TextBlock Classes="step" Text="STEP 3" />
+                        <TextBlock Classes="h2" Text="Write" />
+                        <Border Classes="subtle">
+                            <TextBlock Text="{Binding SelectionText}" TextWrapping="Wrap" FontWeight="SemiBold" />
+                        </Border>
+                        <Button Classes="accent" Command="{Binding WriteCommand}" HorizontalAlignment="Left" Padding="20,9">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <PathIcon Data="{StaticResource IconWrite}" Width="16" Height="16" />
+                                <TextBlock Text="Write to tag…" />
+                            </StackPanel>
+                        </Button>
+                        <TextBlock Classes="caption" TextWrapping="Wrap"
+                                   Text="Available once you've chosen something in step 1 and the tag has passed the check in step 2." />
+                        <ContentControl Content="{Binding WriteStatus}" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

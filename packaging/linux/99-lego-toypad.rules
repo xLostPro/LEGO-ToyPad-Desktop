@@ -1,0 +1,4 @@
+# LEGO Dimensions ToyPad (PS3/PS4/Wii U) — let the logged-in user open it without sudo.
+# Install: sudo cp 99-lego-toypad.rules /etc/udev/rules.d/ && sudo udevadm control --reload && sudo udevadm trigger
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="0e6f", ATTRS{idProduct}=="0241", MODE="0660", TAG+="uaccess"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="0e6f", ATTRS{idProduct}=="0241", MODE="0660", TAG+="uaccess"

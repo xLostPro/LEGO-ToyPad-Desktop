@@ -1,0 +1,155 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:LegoToyPad.App.ViewModels"
+        xmlns:views="using:LegoToyPad.App.Views"
+        x:Class="LegoToyPad.App.Views.MainWindow"
+        x:DataType="vm:MainViewModel"
+        Title="LEGO ToyPad"
+        Icon="/Assets/app.ico"
+        Width="1180" Height="800"
+        MinWidth="860" MinHeight="600"
+        WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource AppBackgroundBrush}">
+
+    <Window.KeyBindings>
+        <KeyBinding Gesture="Ctrl+OemPlus" Command="{Binding ZoomInCommand}" />
+        <KeyBinding Gesture="Ctrl+Add" Command="{Binding ZoomInCommand}" />
+        <KeyBinding Gesture="Ctrl+OemMinus" Command="{Binding ZoomOutCommand}" />
+        <KeyBinding Gesture="Ctrl+Subtract" Command="{Binding ZoomOutCommand}" />
+        <KeyBinding Gesture="Ctrl+D0" Command="{Binding ResetZoomCommand}" />
+        <KeyBinding Gesture="Ctrl+D1" Command="{Binding GoToCommand}" CommandParameter="{Binding Portal}" />
+        <KeyBinding Gesture="Ctrl+D2" Command="{Binding GoToCommand}" CommandParameter="{Binding Write}" />
+        <KeyBinding Gesture="Ctrl+D3" Command="{Binding GoToCommand}" CommandParameter="{Binding Reset}" />
+        <KeyBinding Gesture="Ctrl+D4" Command="{Binding GoToCommand}" CommandParameter="{Binding LibraryPage}" />
+        <KeyBinding Gesture="Ctrl+D5" Command="{Binding GoToCommand}" CommandParameter="{Binding Activity}" />
+        <KeyBinding Gesture="F5" Command="{Binding RescanCommand}" />
+    </Window.KeyBindings>
+
+    <!-- Global menu bar on macOS; rendered in-window by NativeMenuBar on Windows/Linux. -->
+    <NativeMenu.Menu>
+        <NativeMenu>
+            <NativeMenuItem Header="Device">
+                <NativeMenu>
+                    <NativeMenuItem Header="Connect" Command="{Binding ConnectCommand}" Gesture="Ctrl+K" />
+                    <NativeMenuItem Header="Disconnect" Command="{Binding DisconnectCommand}" />
+                    <NativeMenuItem Header="Rescan portal" Command="{Binding RescanCommand}" Gesture="F5" />
+                </NativeMenu>
+            </NativeMenuItem>
+            <NativeMenuItem Header="View">
+                <NativeMenu>
+                    <NativeMenuItem Header="Portal" Command="{Binding GoToCommand}" CommandParameter="{Binding Portal}" Gesture="Ctrl+D1" />
+                    <NativeMenuItem Header="Write" Command="{Binding GoToCommand}" CommandParameter="{Binding Write}" Gesture="Ctrl+D2" />
+                    <NativeMenuItem Header="Reset" Command="{Binding GoToCommand}" CommandParameter="{Binding Reset}" Gesture="Ctrl+D3" />
+                    <NativeMenuItem Header="Library" Command="{Binding GoToCommand}" CommandParameter="{Binding LibraryPage}" Gesture="Ctrl+D4" />
+                    <NativeMenuItem Header="Activity" Command="{Binding GoToCommand}" CommandParameter="{Binding Activity}" Gesture="Ctrl+D5" />
+                    <NativeMenuItemSeparator />
+                    <NativeMenuItem Header="Larger text" Command="{Binding ZoomInCommand}" Gesture="Ctrl+OemPlus" />
+                    <NativeMenuItem Header="Smaller text" Command="{Binding ZoomOutCommand}" Gesture="Ctrl+OemMinus" />
+                    <NativeMenuItem Header="Actual size" Command="{Binding ResetZoomCommand}" Gesture="Ctrl+D0" />
+                    <NativeMenuItemSeparator />
+                    <NativeMenuItem Header="Theme">
+                        <NativeMenu>
+                            <NativeMenuItem Header="Match system" Command="{Binding SetThemeCommand}" CommandParameter="System" />
+                            <NativeMenuItem Header="Light" Command="{Binding SetThemeCommand}" CommandParameter="Light" />
+                            <NativeMenuItem Header="Dark" Command="{Binding SetThemeCommand}" CommandParameter="Dark" />
+                        </NativeMenu>
+                    </NativeMenuItem>
+                </NativeMenu>
+            </NativeMenuItem>
+        </NativeMenu>
+    </NativeMenu.Menu>
+
+    <!-- Scaled by the text-size setting (View › Larger text) -->
+    <LayoutTransformControl x:Name="ZoomHost">
+    <Grid RowDefinitions="Auto,Auto,*,Auto">
+        <NativeMenuBar Grid.Row="0" />
+
+        <!-- Slim progress line while the ToyPad is busy -->
+        <ProgressBar Grid.Row="1" IsIndeterminate="True" Height="3" MinHeight="3"
+                     IsVisible="{Binding IsBusy}"
+                     AutomationProperties.Name="{Binding BusyText}" />
+
+        <Grid Grid.Row="2" ColumnDefinitions="232,*">
+
+            <!-- Navigation rail -->
+            <Border Grid.Column="0" Background="{DynamicResource NavBackgroundBrush}"
+                    BorderBrush="{DynamicResource CardBorderBrush}" BorderThickness="0,0,1,0">
+                <DockPanel Margin="12,16,12,12">
+                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="10" Margin="8,0,0,20">
+                        <Border Width="34" Height="34" CornerRadius="7" Background="{DynamicResource BrandBrush}">
+                            <UniformGrid Rows="2" Columns="2" Margin="6">
+                                <Ellipse Width="8" Height="8" Fill="{DynamicResource BrandStudBrush}" />
+                                <Ellipse Width="8" Height="8" Fill="{DynamicResource BrandStudBrush}" />
+                                <Ellipse Width="8" Height="8" Fill="{DynamicResource BrandStudBrush}" />
+                                <Ellipse Width="8" Height="8" Fill="{DynamicResource BrandStudBrush}" />
+                            </UniformGrid>
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="ToyPad" Classes="h3" />
+                            <TextBlock Text="LEGO Dimensions tags" Classes="caption" FontSize="12" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Connection card -->
+                    <Border DockPanel.Dock="Bottom" Classes="card" Padding="14">
+                        <StackPanel Spacing="10">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Ellipse Classes="status" Classes.connected="{Binding IsConnected}" VerticalAlignment="Center" />
+                                <TextBlock Text="{Binding ConnectionText}" FontWeight="SemiBold"
+                                           AutomationProperties.LiveSetting="Polite" />
+                            </StackPanel>
+                            <Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                                    Classes="accent" Content="_Connect"
+                                    Command="{Binding ConnectCommand}" IsVisible="{Binding IsDisconnected}"
+                                    HotKey="Ctrl+K" ToolTip.Tip="Connect to the ToyPad (Ctrl+K)" />
+                            <Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                                    Content="_Disconnect"
+                                    Command="{Binding DisconnectCommand}" IsVisible="{Binding IsConnected}" />
+                        </StackPanel>
+                    </Border>
+
+                    <ListBox Classes="nav" ItemsSource="{Binding Pages}" SelectedItem="{Binding SelectedPage}"
+                             AutomationProperties.Name="Sections">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate x:DataType="vm:PageViewModel">
+                                <Grid ColumnDefinitions="Auto,Auto,*" AutomationProperties.Name="{Binding Title}">
+                                    <Border Classes="indicator" Width="3" Height="18" CornerRadius="2" Margin="-6,0,9,0" Background="Transparent" />
+                                    <PathIcon Grid.Column="1" Data="{Binding Icon}" Width="18" Height="18" Margin="0,0,12,0" />
+                                    <TextBlock Grid.Column="2" Text="{Binding Title}" VerticalAlignment="Center" FontSize="15" />
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </DockPanel>
+            </Border>
+
+            <Panel Grid.Column="1">
+                    <ContentControl Content="{Binding SelectedPage}" IsVisible="{Binding ShowPage}">
+                        <ContentControl.DataTemplates>
+                            <DataTemplate DataType="vm:PortalViewModel"><views:PortalView /></DataTemplate>
+                            <DataTemplate DataType="vm:WriteViewModel"><views:WriteView /></DataTemplate>
+                            <DataTemplate DataType="vm:ResetViewModel"><views:ResetView /></DataTemplate>
+                            <DataTemplate DataType="vm:LibraryViewModel"><views:LibraryView /></DataTemplate>
+                            <DataTemplate DataType="vm:ActivityViewModel"><views:ActivityView /></DataTemplate>
+                        </ContentControl.DataTemplates>
+                    </ContentControl>
+
+                    <views:ConnectPrompt IsVisible="{Binding ShowConnectPrompt}" />
+            </Panel>
+        </Grid>
+
+        <!-- Status bar -->
+        <Border Grid.Row="3" Background="{DynamicResource NavBackgroundBrush}"
+                BorderBrush="{DynamicResource CardBorderBrush}" BorderThickness="0,1,0,0" Padding="16,6">
+            <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Text="{Binding LastLog.Message, FallbackValue='Ready'}" Classes="caption"
+                           TextTrimming="CharacterEllipsis"
+                           AutomationProperties.Name="Last activity"
+                           AutomationProperties.LiveSetting="Polite" />
+                <TextBlock Grid.Column="1" Classes="caption" Margin="16,0,0,0"
+                           Text="{Binding ZoomText, StringFormat='Text size {0}'}" />
+            </Grid>
+        </Border>
+    </Grid>
+    </LayoutTransformControl>
+</Window>
