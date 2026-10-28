@@ -21,13 +21,19 @@
                     <RadioButton GroupName="TokenKind" Content="_Vehicles &amp; gadgets" IsChecked="{Binding IsVehicleMode}" />
                 </StackPanel>
 
-                <TextBox Grid.Row="3" Text="{Binding SearchText}" PlaceholderText="Search by name, world or ID"
-                         AutomationProperties.Name="Search characters and vehicles">
-                    <TextBox.InnerLeftContent>
-                        <PathIcon Data="{StaticResource IconSearch}" Width="16" Height="16" Margin="10,0,0,0"
-                                  Foreground="{DynamicResource SecondaryTextBrush}" />
-                    </TextBox.InnerLeftContent>
-                </TextBox>
+                <Grid Grid.Row="3" ColumnDefinitions="*,Auto">
+                    <TextBox Text="{Binding SearchText}" PlaceholderText="Search by name, world or ID"
+                             AutomationProperties.Name="Search characters and vehicles">
+                        <TextBox.InnerLeftContent>
+                            <PathIcon Data="{StaticResource IconSearch}" Width="16" Height="16" Margin="10,0,0,0"
+                                      Foreground="{DynamicResource SecondaryTextBrush}" />
+                        </TextBox.InnerLeftContent>
+                    </TextBox>
+                    <ComboBox Grid.Column="1" Margin="8,0,0,0" MinWidth="160"
+                              ItemsSource="{Binding Worlds}" SelectedItem="{Binding SelectedWorld}"
+                              IsVisible="{Binding IsCharacterMode}"
+                              AutomationProperties.Name="Filter by world" />
+                </Grid>
 
                 <TextBlock Grid.Row="4" Classes="caption" Text="{Binding ResultCountText}" AutomationProperties.LiveSetting="Polite" />
 

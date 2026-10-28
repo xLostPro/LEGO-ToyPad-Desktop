@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LegoToyPad.Core;
 using LegoToyPad.Core.Library;
@@ -24,13 +25,33 @@ public sealed partial class LibraryViewModel : PageViewModel
 
     public override bool RequiresDevice => false;
 
-    public bool IsEmpty => Entries.Count == 0;
+    [ObservableProperty]
+    public partial string SearchText { get; set; } = string.Empty;
+
+    partial void OnSearchTextChanged(string value) => Refresh();
+
+    public bool HasAnySaved => Main.Library.Items.Count > 0;
+    public bool HasNoMatches => HasAnySaved && Entries.Count == 0;
+    public bool IsEmpty => !HasAnySaved;
 
     public void Refresh()
     {
         Entries.Clear();
-        foreach (var entry in Main.Library.Items) Entries.Add(new LibraryEntryViewModel(entry));
+        var query = SearchText.Trim();
+        foreach (var entry in Main.Library.Items)
+        {
+            if (!string.IsNullOrEmpty(query))
+            {
+                var matches = entry.Name.Contains(query, StringComparison.CurrentCultureIgnoreCase) ||
+                              (entry.World is not null && entry.World.Contains(query, StringComparison.CurrentCultureIgnoreCase)) ||
+                              entry.Id.ToString().Contains(query, StringComparison.OrdinalIgnoreCase);
+                if (!matches) continue;
+            }
+            Entries.Add(new LibraryEntryViewModel(entry));
+        }
         OnPropertyChanged(nameof(IsEmpty));
+        OnPropertyChanged(nameof(HasAnySaved));
+        OnPropertyChanged(nameof(HasNoMatches));
     }
 
     [RelayCommand]

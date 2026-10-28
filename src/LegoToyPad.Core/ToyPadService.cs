@@ -180,7 +180,7 @@ public sealed class ToyPadService : IDisposable
             List<ActiveTag> toIdentify;
             lock (_tagsLock)
             {
-                if (discovered.Count > 0 || _tags.Count == 0) _tags.Clear();
+                _tags.Clear();
                 foreach (var tag in discovered) _tags[(tag.Pad, tag.Index)] = tag;
                 toIdentify = _tags.Values.ToList();
             }
@@ -554,10 +554,14 @@ public sealed class ToyPadService : IDisposable
             passwordPage.AsSpan().SequenceEqual(Zero4));
     }
 
-    public async Task<ResetResult> CommitResetAsync(bool clearPasswordPage, CancellationToken ct = default)
+    public async Task<ResetResult> CommitResetAsync(bool clearPasswordPage, string? expectedUid = null, CancellationToken ct = default)
     {
         var tag = RequireCenterTag("Place the tag back on center.");
         using var keepAlivePause = Device.PauseKeepAlive();
+
+        var uid = await ResolveTrustedUidAsync(tag, ct);
+        if (expectedUid is not null && !string.Equals(uid, expectedUid, StringComparison.OrdinalIgnoreCase) && !string.Equals(tag.Uid, expectedUid, StringComparison.OrdinalIgnoreCase))
+            throw new InvalidOperationException("The tag on CENTER changed since it was previewed. Run \"Preview reset\" again.");
 
         var passwordPage = await Device.ReadPageAsync(tag.Index, PagePassword, ct);
         var pages = GameplayPages.ToList();

@@ -149,7 +149,7 @@ public sealed partial class ReadResultViewModel(TagReadResult result, MainViewMo
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(SaveText))]
-    public partial bool IsSaved { get; set; }
+    public partial bool IsSaved { get; set; } = result.Identity is { } id && main.Library.Contains(id);
 
     public string SaveText => IsSaved ? "Saved to library" : "Save to library";
 

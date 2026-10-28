@@ -15,14 +15,24 @@ public sealed record TokenOption(TokenKind Kind, uint Id, string Name, string De
 public sealed partial class WriteViewModel : PageViewModel
 {
     private static readonly IReadOnlyList<TokenOption> AllCharacters = TokenDatabase.Characters
+        .Where(c => !c.IsPlaceholder)
         .Select(c => new TokenOption(TokenKind.Character, c.Id, c.Name, c.World))
         .OrderBy(o => o.Name, StringComparer.CurrentCultureIgnoreCase)
         .ToList();
 
     private static readonly IReadOnlyList<TokenOption> AllVehicles = TokenDatabase.Vehicles
+        .Where(v => !v.IsPlaceholder)
         .Select(v => new TokenOption(TokenKind.Vehicle, v.Id, v.Name.TrimStart('*', ' '), v.Rebuild == 0 ? "Vehicle / gadget" : $"Alternate build {v.Rebuild}"))
         .OrderBy(o => o.Id)
         .ToList();
+
+    public const string AllWorldsOption = "All worlds";
+
+    public static IReadOnlyList<string> AllWorlds { get; } = new[] { AllWorldsOption }
+        .Concat(AllCharacters.Select(c => c.Detail).Distinct(StringComparer.CurrentCultureIgnoreCase).OrderBy(w => w, StringComparer.CurrentCultureIgnoreCase))
+        .ToList();
+
+    public IReadOnlyList<string> Worlds => AllWorlds;
 
     private string? _checkedUid;
 
@@ -42,6 +52,9 @@ public sealed partial class WriteViewModel : PageViewModel
 
     [ObservableProperty]
     public partial string SearchText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string SelectedWorld { get; set; } = AllWorldsOption;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(WriteCommand))]
@@ -66,20 +79,25 @@ public sealed partial class WriteViewModel : PageViewModel
 
     partial void OnSearchTextChanged(string value) => ApplyFilter();
 
-    public override void OnNavigatedTo()
+    partial void OnSelectedWorldChanged(string value) => ApplyFilter();
+
+    public void UpdateTags(IReadOnlyList<ActiveTag> tags)
     {
-        // A different tag may have been placed since the last check.
-        if (Main.Service.ActiveTags.All(t => t.Pad != Pad.Center || t.Uid != _checkedUid))
+        if (_checkedUid is not null && tags.All(t => t.Pad != Pad.Center || !string.Equals(t.Uid, _checkedUid, StringComparison.OrdinalIgnoreCase)))
         {
+            _checkedUid = null;
             IsTagReady = false;
             CheckStatus = null;
         }
     }
 
+    public override void OnNavigatedTo() => UpdateTags(Main.Service.ActiveTags);
+
     public void Select(TokenKind kind, uint id)
     {
         IsCharacterMode = kind == TokenKind.Character;
         SearchText = string.Empty;
+        SelectedWorld = AllWorldsOption;
         Selected = Options.FirstOrDefault(o => o.Id == id);
         WriteStatus = null;
     }
@@ -93,6 +111,9 @@ public sealed partial class WriteViewModel : PageViewModel
         Options.Clear();
         foreach (var option in source)
         {
+            if (IsCharacterMode && SelectedWorld != AllWorldsOption && !string.Equals(option.Detail, SelectedWorld, StringComparison.CurrentCultureIgnoreCase))
+                continue;
+
             if (query.Length == 0
                 || option.Name.Contains(query, StringComparison.CurrentCultureIgnoreCase)
                 || option.Detail.Contains(query, StringComparison.CurrentCultureIgnoreCase)

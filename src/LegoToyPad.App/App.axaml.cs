@@ -23,7 +23,11 @@ public partial class App : Application
                 : new HidSharpTransportFactory();
             var service = new ToyPadService(transport);
             var window = new MainWindow();
-            window.DataContext = new MainViewModel(service, new LibraryStore(LibraryStore.DefaultPath), window);
+            window.DataContext = new MainViewModel(
+                service,
+                new LibraryStore(LibraryStore.DefaultPath),
+                window,
+                new SettingsStore(SettingsStore.DefaultPath));
             desktop.MainWindow = window;
             desktop.ShutdownRequested += (_, _) => service.Dispose();
         }

@@ -27,6 +27,19 @@ public class LibraryStoreTests : IDisposable
     }
 
     [Fact]
+    public void ContainsReturnsTrueForSavedIdentity()
+    {
+        var store = new LibraryStore(_path);
+        var batman = new TagIdentity(TokenKind.Character, 1, "Batman", "DC Comics");
+        var gandalf = new TagIdentity(TokenKind.Character, 2, "Gandalf", "Lord of the Rings");
+
+        Assert.False(store.Contains(batman));
+        store.Add(batman, null);
+        Assert.True(store.Contains(batman));
+        Assert.False(store.Contains(gandalf));
+    }
+
+    [Fact]
     public void CorruptFileStartsEmpty()
     {
         Directory.CreateDirectory(Path.GetDirectoryName(_path)!);

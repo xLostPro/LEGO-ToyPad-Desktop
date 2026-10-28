@@ -107,6 +107,32 @@ public class ServiceTests
     }
 
     [Fact]
+    public async Task CommitReset_RejectsSwappedTag()
+    {
+        var (service, pad) = await ConnectedAsync();
+        pad.PlaceTag(pad: 1, index: 0, Uid);
+        await WaitForTagAsync(service, t => t.State != IdentifyState.Pending);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            service.CommitResetAsync(clearPasswordPage: false, expectedUid: "04000000000000"));
+    }
+
+    [Fact]
+    public async Task Rescan_ClearsActiveTags_WhenTagsRemovedWithoutEvents()
+    {
+        var (service, pad) = await ConnectedAsync();
+        pad.PlaceTag(pad: 1, index: 0, Uid);
+        await WaitForTagAsync(service, t => t.State != IdentifyState.Pending);
+        Assert.Single(service.ActiveTags);
+
+        pad.RemoveTag(1, 0, fireEvent: false);
+
+        await service.RescanAsync();
+
+        Assert.Empty(service.ActiveTags);
+    }
+
+    [Fact]
     public async Task Rescan_FindsTagsAlreadyOnThePortal()
     {
         var pad = new SimulatedToyPad();

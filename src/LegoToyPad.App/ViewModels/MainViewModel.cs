@@ -15,11 +15,15 @@ public partial class MainViewModel : ViewModelBase
     private const double MinZoom = 0.8;
     private const double MaxZoom = 2.0;
 
-    public MainViewModel(ToyPadService service, LibraryStore library, IUiHost host)
+    private readonly SettingsStore? _settings;
+    private string _theme = "System";
+
+    public MainViewModel(ToyPadService service, LibraryStore library, IUiHost host, SettingsStore? settings = null)
     {
         Service = service;
         Library = library;
         Host = host;
+        _settings = settings;
 
         Portal = new PortalViewModel(this);
         Write = new WriteViewModel(this);
@@ -29,8 +33,15 @@ public partial class MainViewModel : ViewModelBase
         Pages = [Portal, Write, Reset, LibraryPage, Activity];
         SelectedPage = Portal;
 
+        if (_settings is not null)
+        {
+            var saved = _settings.Load();
+            Zoom = saved.Zoom;
+            SetTheme(saved.Theme);
+        }
+
         service.Log += entry => Dispatcher.UIThread.Post(() => AddLog(entry));
-        service.TagsChanged += tags => Dispatcher.UIThread.Post(() => Portal.UpdateTags(tags));
+        service.TagsChanged += tags => Dispatcher.UIThread.Post(() => OnTagsChanged(tags));
         service.ConnectionChanged += (connected, error) => Dispatcher.UIThread.Post(() => OnConnectionChanged(connected, error));
     }
 
@@ -76,6 +87,8 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ZoomText))]
     public partial double Zoom { get; set; } = 1.0;
+
+    partial void OnZoomChanged(double value) => _settings?.Save(new UserSettings(_theme, Zoom));
 
     public bool IsDisconnected => !IsConnected;
     public bool IsIdle => !IsBusy;
@@ -126,7 +139,14 @@ public partial class MainViewModel : ViewModelBase
         IsConnected = connected;
         if (!connected && error is not null && !IsConnecting)
             ConnectionError = new StatusMessage(Severity.Error, "The ToyPad was disconnected", error);
-        if (!connected) Portal.UpdateTags([]);
+        if (!connected) OnTagsChanged([]);
+    }
+
+    private void OnTagsChanged(IReadOnlyList<ActiveTag> tags)
+    {
+        Portal.UpdateTags(tags);
+        Write.UpdateTags(tags);
+        Reset.UpdateTags(tags);
     }
 
     // ------------------------------------------------------------------
@@ -192,8 +212,10 @@ public partial class MainViewModel : ViewModelBase
     [RelayCommand]
     private void SetTheme(string variant)
     {
+        _theme = variant is "Light" or "Dark" ? variant : "System";
+        _settings?.Save(new UserSettings(_theme, Zoom));
         if (Application.Current is null) return;
-        Application.Current.RequestedThemeVariant = variant switch
+        Application.Current.RequestedThemeVariant = _theme switch
         {
             "Light" => ThemeVariant.Light,
             "Dark" => ThemeVariant.Dark,

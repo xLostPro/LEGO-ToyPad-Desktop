@@ -19,11 +19,15 @@ public sealed partial class ResetViewModel(MainViewModel main) : PageViewModel(m
 
     public bool HasPreview => Preview is not null;
 
-    public override void OnNavigatedTo()
+    public void UpdateTags(IReadOnlyList<ActiveTag> tags)
     {
-        if (Preview is not null && Main.Service.ActiveTags.All(t => t.Pad != Pad.Center || t.Uid != Preview.Tag.Uid))
+        if (Preview is not null && tags.All(t => t.Pad != Pad.Center || !string.Equals(t.Uid, Preview.Tag.Uid, StringComparison.OrdinalIgnoreCase)))
+        {
             Preview = null;
+        }
     }
+
+    public override void OnNavigatedTo() => UpdateTags(Main.Service.ActiveTags);
 
     [RelayCommand]
     private async Task PreviewAsync()
@@ -44,7 +48,8 @@ public sealed partial class ResetViewModel(MainViewModel main) : PageViewModel(m
             destructive: true);
         if (!confirmed) return;
 
-        var result = await Main.RunAsync("Resetting tag…", () => Main.Service.CommitResetAsync(ClearPasswordPage),
+        var expectedUid = Preview?.Tag.Uid;
+        var result = await Main.RunAsync("Resetting tag…", () => Main.Service.CommitResetAsync(ClearPasswordPage, expectedUid),
             ex => Status = new StatusMessage(Severity.Error, "Reset failed", ex.Message));
         if (result is null) return;
 

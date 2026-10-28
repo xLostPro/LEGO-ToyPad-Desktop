@@ -58,10 +58,10 @@ public sealed class SimulatedToyPad : IHidTransport, IHidTransportFactory
         SendEvent(pad, index, added: true, reportedUid ?? uid);
     }
 
-    public void RemoveTag(int pad, int index)
+    public void RemoveTag(int pad, int index, bool fireEvent = true)
     {
         _tags.TryRemove(index, out _);
-        SendEvent(pad, index, added: false, "00000000000000");
+        if (fireEvent) SendEvent(pad, index, added: false, "00000000000000");
     }
 
     public byte[] Page(int index, int page) => _tags[index].AsSpan(page * 4, 4).ToArray();
