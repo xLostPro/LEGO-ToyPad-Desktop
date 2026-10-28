@@ -122,6 +122,43 @@ public sealed class UiFlowTests : IDisposable
         Assert.Equal("The ToyPad was disconnected", vm.ConnectionError?.Title);
     }
 
+    [Fact]
+    public void SettingsPersistenceAndWorldFilter()
+    {
+        var settingsPath = Path.Combine(_libraryDir, "settings.json");
+        var settingsStore = new SettingsStore(settingsPath);
+        var pad = SimulatedToyPad.CreateDemo();
+        var service = new ToyPadService(pad, startupDelay: TimeSpan.Zero);
+        var library = new LibraryStore(Path.Combine(_libraryDir, "library.json"));
+        var vm = new MainViewModel(service, library, new AutoConfirmHost(), settingsStore);
+
+        vm.ZoomInCommand.Execute(null);
+        Assert.Equal(1.1, vm.Zoom);
+        vm.SetThemeCommand.Execute("Dark");
+
+        var vm2 = new MainViewModel(service, library, new AutoConfirmHost(), settingsStore);
+        Assert.Equal(1.1, vm2.Zoom);
+
+        Assert.Contains(WriteViewModel.AllWorldsOption, vm2.Write.Worlds);
+        Assert.Contains("DC Comics", vm2.Write.Worlds);
+        vm2.Write.SelectedWorld = "DC Comics";
+        Assert.All(vm2.Write.Options, o => Assert.Equal("DC Comics", o.Detail));
+
+        library.Add(new TagIdentity(TokenKind.Character, 1, "Batman", "DC Comics"), null);
+        library.Add(new TagIdentity(TokenKind.Character, 2, "Gandalf", "Lord of the Rings"), null);
+        vm2.LibraryPage.Refresh();
+        Assert.Equal(2, vm2.LibraryPage.Entries.Count);
+
+        vm2.LibraryPage.SearchText = "Batman";
+        Assert.Single(vm2.LibraryPage.Entries);
+        Assert.Equal("Batman", vm2.LibraryPage.Entries[0].Name);
+        Assert.False(vm2.LibraryPage.HasNoMatches);
+
+        vm2.LibraryPage.SearchText = "NonExistentTag";
+        Assert.Empty(vm2.LibraryPage.Entries);
+        Assert.True(vm2.LibraryPage.HasNoMatches);
+    }
+
     private static async Task WaitUntil(Func<bool> condition)
     {
         for (var i = 0; i < 300; i++)

@@ -5,9 +5,19 @@ using System.Text.Json.Serialization.Metadata;
 
 namespace LegoToyPad.Core.Data;
 
-public sealed record Character(uint Id, string Name, string World);
+public sealed record Character(uint Id, string Name, string World)
+{
+    public bool IsPlaceholder =>
+        Name.Equals("Unknown", StringComparison.OrdinalIgnoreCase) ||
+        Name.Equals("Future Update", StringComparison.OrdinalIgnoreCase) ||
+        Name.StartsWith("Test ", StringComparison.OrdinalIgnoreCase);
+}
 
-public sealed record Vehicle(uint Id, string Name, int Rebuild, int UpgradeMap);
+public sealed record Vehicle(uint Id, string Name, int Rebuild, int UpgradeMap)
+{
+    public bool IsPlaceholder =>
+        Name.Equals("unknown", StringComparison.OrdinalIgnoreCase);
+}
 
 /// <summary>Bundled character and vehicle/gadget lists (same data as the CLI's charactermap/tokenmap JSON).</summary>
 public static class TokenDatabase

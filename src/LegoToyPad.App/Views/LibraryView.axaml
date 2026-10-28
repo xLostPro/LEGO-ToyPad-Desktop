@@ -21,6 +21,22 @@
                 </StackPanel>
             </Border>
 
+            <TextBox Text="{Binding SearchText}" PlaceholderText="Search saved tags by name, world or ID"
+                     IsVisible="{Binding HasAnySaved}"
+                     AutomationProperties.Name="Search library">
+                <TextBox.InnerLeftContent>
+                    <PathIcon Data="{StaticResource IconSearch}" Width="16" Height="16" Margin="10,0,0,0"
+                              Foreground="{DynamicResource SecondaryTextBrush}" />
+                </TextBox.InnerLeftContent>
+            </TextBox>
+
+            <Border Classes="card" IsVisible="{Binding HasNoMatches}">
+                <StackPanel Spacing="4">
+                    <TextBlock Classes="h3" Text="No matching saved tags" />
+                    <TextBlock Classes="secondary" Text="Try a different search term." />
+                </StackPanel>
+            </Border>
+
             <ItemsControl ItemsSource="{Binding Entries}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>

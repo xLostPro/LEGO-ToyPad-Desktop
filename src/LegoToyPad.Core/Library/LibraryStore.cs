@@ -41,6 +41,11 @@ public sealed class LibraryStore
         get { lock (_lock) return _items.ToList(); }
     }
 
+    public bool Contains(TagIdentity identity)
+    {
+        lock (_lock) return _items.Any(i => i.Type == identity.Kind && i.Id == identity.Id);
+    }
+
     /// <summary>Saves an identity; returns the existing entry if the same type+id is already saved.</summary>
     public LibraryEntry Add(TagIdentity identity, string? sourceUid)
     {
